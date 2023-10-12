@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 """Module containing tests for the Base Model class"""
-import unittest
-from datetime import datetime
 from models.base_model import BaseModel
+import unittest
+import uuid
+from datetime import datetime
 
 
 class TestBaseModel(unittest.TestCase):
@@ -58,3 +59,29 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(self.result_dict['__class__'], 'BaseModel')
         self.assertIsInstance(self.result_dict['created_at'], str)
         self.assertIsInstance(self.result_dict['updated_at'], str)
+
+    def test_args(self):
+        """Test case for objects instanciated from `*args`"""
+        example_args = ['8ebf8a40-48bc-4fb8-b77c-06cbef4a8b90', '2023-10-12T11:51:51.884906', '2023-10-12T11:51:51.884906']
+        self.base_args = BaseModel(*example_args)
+        self.assertNotEqual(self.base_args.id, example_args[0])
+        self.assertNotEqual(self.base_args.created_at, datetime.fromisoformat(example_args[1]))
+        self.assertNotEqual(self.base_args.updated_at, datetime.fromisoformat(example_args[2]))
+
+    def test_kwargs(self):
+        """Test case for objects instanciated from `**kwargs`"""
+        example_kwargs = {
+            "id": 'eb49b0b0-e5e4-4bbc-a5e1-60002edc3c7e',
+            "created_at": '2035-01-17T12:30:34.884906',
+            "updated_at": '2100-07-25T06:25:58.906884'
+        }
+        self.base_kwargs = BaseModel(**example_kwargs)
+        self.assertIsInstance(self.base_kwargs, BaseModel)
+        self.assertEqual(self.base_kwargs.__class__.__name__, "BaseModel")
+        self.assertEqual(self.base_kwargs.id, example_kwargs['id'])
+        self.assertIsInstance(self.base_kwargs.created_at, datetime)
+        self.assertIsInstance(self.base_kwargs.updated_at, datetime)
+        self.assertEqual(self.base_kwargs.created_at,
+                         datetime.fromisoformat(example_kwargs['created_at']))
+        self.assertEqual(self.base_kwargs.updated_at,
+                         datetime.fromisoformat(example_kwargs['updated_at']))

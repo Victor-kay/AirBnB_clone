@@ -19,18 +19,18 @@ class BaseModel:
                 *args: arguments
                 *kwargs (dict): Key/value pairs of properties of a Base class
         """
-        if args and kwargs or kwargs:
+        if not kwargs:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
+        else:
             for key, value in kwargs.items():
                 if key == 'id':
-                    self.id = value
+                    self.id = str(value)
                 if key == 'created_at':
                     self.created_at = datetime.fromisoformat(value)
                 if key == 'updated_at':
                     self.updated_at = datetime.fromisoformat(value)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
 
     def __str__(self):
         """Return the string representation of a class"""
@@ -54,11 +54,3 @@ class BaseModel:
         })
         result_dict['__class__'] = self.__class__.__name__
         return result_dict
-
-
-if __name__ == "__main__":
-    base1 = BaseModel()
-    base1.to_dict()
-    print()
-    print(base1)
-    print(BaseModel.__dict__)
