@@ -4,9 +4,9 @@
 Module containing the Base model super class for all models
 
 """
-import json
 import uuid
 from datetime import datetime
+from models import storage
 
 
 class BaseModel:
@@ -23,6 +23,7 @@ class BaseModel:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
+            storage.new(self)
         else:
             for key, value in kwargs.items():
                 if key == 'id':
@@ -54,3 +55,16 @@ class BaseModel:
         })
         result_dict['__class__'] = self.__class__.__name__
         return result_dict
+
+    def save(self):
+        """Save an object to file storage
+
+            Args:
+                None
+
+            Returns:
+                None
+        """
+        self.updated_at = datetime.now()
+        self.to_dict()
+        storage.save()
