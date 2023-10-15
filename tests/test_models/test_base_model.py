@@ -1,13 +1,25 @@
 #!/usr/bin/python3
 
 """Module containing tests for the Base Model class"""
-from models.base_model import BaseModel
 import unittest
+from models.base_model import BaseModel
+from models.engine.file_storage import FileStorage
+from models import storage
 from datetime import datetime
 
 
 class TestBaseModel(unittest.TestCase):
     """Test class for the Base Model"""
+
+    @classmethod
+    def setUpClass(self):
+        """Set up a one time procedure for the entire test run"""
+        pass
+
+    @classmethod
+    def tearDownClass(self):
+        """Clean up procedures set up"""
+        pass
 
     def test_uuid(self):
         """Test the id property of the Base Model"""
@@ -91,4 +103,41 @@ class TestBaseModel(unittest.TestCase):
 
     def test_save(self):
         """Test the `save` method"""
-        pass
+        my_base_obj = BaseModel()
+        my_base_obj.name = "Test subject 1"
+        my_base_obj.message = "Hello. Who are you? Where am I?"
+        updated_time = my_base_obj.updated_at
+        my_base_obj.save()
+        self.assertLess(updated_time, my_base_obj.updated_at)
+        self.assertIn("BaseModel." + my_base_obj.id,
+                      FileStorage._FileStorage__objects.keys())
+        self.assertIn("name", FileStorage._FileStorage__objects[
+                      "BaseModel." + my_base_obj.id].__dict__.keys())
+        self.assertIn("message", FileStorage._FileStorage__objects[
+                        "BaseModel." + my_base_obj.id].__dict__.keys())
+        self.assertEqual(FileStorage._FileStorage__objects[
+            "BaseModel." + my_base_obj.id].name, "Test subject 1")
+        self.assertEqual(
+            FileStorage._FileStorage__objects[
+                "BaseModel." + my_base_obj.id
+                ].message, "Hello. Who are you? Where am I?")
+
+    def test_reload(self):
+        """Test that data is deserialized properly"""
+        my_base_obj = BaseModel()
+        my_base_obj.name = "Test subject 2"
+        my_base_obj.message = "What is this?"
+        my_base_obj.save()
+        storage.reload()
+        self.assertIn("BaseModel." + my_base_obj.id,
+                      FileStorage._FileStorage__objects.keys())
+        self.assertIn("name", FileStorage._FileStorage__objects[
+                      "BaseModel." + my_base_obj.id].__dict__.keys())
+        self.assertIn("message", FileStorage._FileStorage__objects[
+                        "BaseModel." + my_base_obj.id].__dict__.keys())
+        self.assertEqual(FileStorage._FileStorage__objects[
+            "BaseModel." + my_base_obj.id].name, "Test subject 2")
+        self.assertEqual(
+            FileStorage._FileStorage__objects[
+                "BaseModel." + my_base_obj.id
+                ].message, "What is this?")
