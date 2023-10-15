@@ -8,7 +8,6 @@ serializes/deserializes data to/from JSON files
 import json
 
 
-
 class FileStorage:
     """Manage application data storage
 
