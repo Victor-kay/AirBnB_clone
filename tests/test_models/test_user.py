@@ -6,9 +6,12 @@
 """
 
 import unittest
+import uuid
 from datetime import datetime
 from models.user import User
 from models.base_model import BaseModel
+from models.engine.file_storage import FileStorage
+from models import storage
 
 
 class TestUser(unittest.TestCase):
@@ -31,7 +34,8 @@ class TestUser(unittest.TestCase):
 
     def tearDown(self):
         """Tear down after each test runs"""
-        pass
+        del self.my_user1
+        del self.my_user2
 
     def test_user_object(self):
         """Test the existence and properties of the user object"""
@@ -45,6 +49,16 @@ class TestUser(unittest.TestCase):
         self.assertTrue(hasattr(self.my_user1, 'password'),
                         "Password attribute does not exist")
 
+    def test_user_attr_types(self):
+        """Test the attribute types of the user object"""
+        self.assertIsInstance(self.my_user1.id, str)
+        self.assertIsInstance(self.my_user1.created_at, datetime)
+        self.assertIsInstance(self.my_user1.updated_at, datetime)
+        self.assertIsInstance(self.my_user1.first_name, str)
+        self.assertIsInstance(self.my_user1.last_name, str)
+        self.assertIsInstance(self.my_user1.email, str)
+        self.assertIsInstance(self.my_user1.password, str)
+
     def test_user_base_inheritance(self):
         """Test inheritance from BaseModel"""
         self.assertIsInstance(self.my_user1, BaseModel)
@@ -54,6 +68,12 @@ class TestUser(unittest.TestCase):
         self.assertTrue(hasattr(self.my_user1, 'updated_at'))
         self.assertTrue(hasattr(self.my_user1, 'to_dict'))
         self.assertTrue(hasattr(self.my_user1, 'save'))
+
+    def test_user_id_unique(self):
+        """Test the `id` of a user"""
+        self.assertIsInstance(uuid.UUID(self.my_user1.id), uuid.UUID)
+        self.assertIsInstance(uuid.UUID(self.my_user2.id), uuid.UUID)
+        self.assertNotEqual(self.my_user1.id, self.my_user2.id)
 
     def test_user_first_name(self):
         """Test cases for a user's `first_name`"""
@@ -139,3 +159,10 @@ class TestUser(unittest.TestCase):
         self.assertEqual(my_user_dict['email'], self.my_user1.email)
         self.assertEqual(my_user_dict['password'], self.my_user1.password)
         self.assertEqual(my_user_dict['__class__'], "User")
+
+    def test_user_save(self):
+        """Test when a user object is saved"""
+        self.my_user1.save()
+        self.assertNotEqual(self.my_user1.created_at, self.my_user1.updated_at)
+        self.my_user2.save()
+        self.assertNotEqual(self.my_user2.created_at, self.my_user2.updated_at)
